@@ -1,0 +1,57 @@
+// SPDX-License-Identifier: UNLICENSED
+
+pragma solidity ^0.8.0;
+
+contract StudentData {
+    // Define a Student structure
+    struct Student {
+        string name;
+        uint age;
+        uint grade;
+    }
+
+    // Array to store student records
+    Student[] public students;
+
+    // Event to log when a new student is added
+    event StudentAdded(string name, uint age, uint grade);
+
+    // Function to add a new student
+    function addStudent(string memory _name, uint _age, uint _grade) public {
+        // Push new student data into the students array
+        students.push(Student(_name, _age, _grade));
+        emit StudentAdded(_name, _age, _grade);  // Emit an event when a student is added
+    }
+
+    // Function to get a student's data by index
+    function getStudent(uint index) public view returns (string memory, uint, uint) {
+        require(index < students.length, "Student does not exist.");
+        Student memory student = students[index];
+        return (student.name, student.age, student.grade);
+    }
+
+    // Function to get a student's data by name
+    function getStudentByName(string memory _name) public view returns (string memory, uint, uint) {
+        for (uint i = 0; i < students.length; i++) {
+            if (keccak256(abi.encodePacked(students[i].name)) == keccak256(abi.encodePacked(_name))) {
+                return (students[i].name, students[i].age, students[i].grade);
+            }
+        }
+        revert("Student with that name does not exist.");
+    }
+
+    // Function to get the total number of students
+    function getTotalStudents() public view returns (uint) {
+        return students.length;
+    }
+
+    // Receive function to handle plain Ether transfers
+    receive() external payable {
+        // Optional: Emit an event when Ether is received
+    }
+
+    // Fallback function to handle unexpected calls or when Ether is sent with data
+    fallback() external payable {
+        // Optional: Emit an event when Ether is sent with data
+    }
+}
