@@ -1,128 +1,109 @@
-import java.util.Comparator;
+import java.util.Comparator; 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Scanner;
+import java.util.PriorityQueue; 
+import java.util.Scanner; 
 
-class HuffmanNode {
-    char character;
-    int frequency;
-    HuffmanNode left;
-    HuffmanNode right;
+class Huffman { 
 
-    // Constructor for a leaf node (character node)
-    public HuffmanNode(char character, int frequency) {
-        this.character = character;
-        this.frequency = frequency;
-        this.left = null;
-        this.right = null;
+    // Function to calculate frequency of each character in the string
+    public static Map<Character, Integer> calculateFrequency(String input) {
+        Map<Character, Integer> frequencyMap = new HashMap<>();
+        for (char c : input.toCharArray()) {
+            frequencyMap.put(c, frequencyMap.getOrDefault(c, 0) + 1);
+        }
+        return frequencyMap;
     }
 
-    // Constructor for an internal node (frequency node)
-    public HuffmanNode(int frequency, HuffmanNode left, HuffmanNode right) {
-        this.character = '\0';
-        this.frequency = frequency;
-        this.left = left;
-        this.right = right;
-    }
-}
+    // Function to build the Huffman tree using a priority queue
+    public static HuffmanNode buildHuffmanTree(char[] charArray, int[] charfreq) {
+        PriorityQueue<HuffmanNode> q = new PriorityQueue<>(charArray.length, new MyComparator());
 
-// Comparator for the priority queue
-class HuffmanComparator implements Comparator<HuffmanNode> {
-    public int compare(HuffmanNode node1, HuffmanNode node2) {
-        return node1.frequency - node2.frequency;
-    }
-}
-
-public class HuffmanEncoding {
-
-    // Function to build the Huffman Tree
-    public static HuffmanNode buildHuffmanTree(Map<Character, Integer> frequencyMap) {
-        PriorityQueue<HuffmanNode> priorityQueue = new PriorityQueue<>(new HuffmanComparator());
-
-        // Create a leaf node for each character and add it to the priority queue
-        for (Map.Entry<Character, Integer> entry : frequencyMap.entrySet()) {
-            priorityQueue.add(new HuffmanNode(entry.getKey(), entry.getValue()));
+        for (int i = 0; i < charArray.length; i++) {
+            HuffmanNode hn = new HuffmanNode();
+            hn.c = charArray[i];
+            hn.data = charfreq[i];
+            hn.left = null;
+            hn.right = null;
+            q.add(hn);
         }
 
-        // Build the Huffman Tree
-        while (priorityQueue.size() > 1) {
-            // Remove the two nodes of lowest frequency
-            HuffmanNode left = priorityQueue.poll();
-            HuffmanNode right = priorityQueue.poll();
+        HuffmanNode root = null;
+        while (q.size() > 1) {
+            HuffmanNode x = q.poll();
+            HuffmanNode y = q.poll();
 
-            // Create a new internal node with these two nodes as children
-            HuffmanNode parent = new HuffmanNode(left.frequency + right.frequency, left, right);
-            priorityQueue.add(parent);
+            HuffmanNode f = new HuffmanNode();
+            f.data = x.data + y.data;
+            f.c = '-';
+            f.left = x;
+            f.right = y;
+            root = f;
+            q.add(f);
         }
-
-        // The remaining node is the root of the Huffman Tree
-        return priorityQueue.poll();
+        return root;
     }
 
-    // Recursive function to generate Huffman Codes
-    public static void generateCodes(HuffmanNode root, String code, Map<Character, String> huffmanCodes) {
+    // Recursive function to print the Huffman code by traversing the Huffman tree
+    public static void printCode(HuffmanNode root, String s) { 
         if (root == null) {
             return;
         }
 
-        // If this is a leaf node, then it contains one of the input characters
         if (root.left == null && root.right == null) {
-            huffmanCodes.put(root.character, code);
+            System.out.println(root.c + ":" + s);
+            return;
         }
 
-        // Traverse the left and right children
-        generateCodes(root.left, code + "0", huffmanCodes);
-        generateCodes(root.right, code + "1", huffmanCodes);
+        printCode(root.left, s + "0"); 
+        printCode(root.right, s + "1"); 
     }
 
-    // Function to encode an input string using the generated Huffman Codes
-    public static String encode(String text, Map<Character, String> huffmanCodes) {
-        StringBuilder encodedText = new StringBuilder();
+    public static void main(String[] args) { 
+        Scanner scanner = new Scanner(System.in); 
+        System.out.println("Enter a string:"); 
+        String input = scanner.nextLine(); 
 
-        for (char character : text.toCharArray()) {
-            encodedText.append(huffmanCodes.get(character));
+        // Step 1: Calculate frequency of each character
+        Map<Character, Integer> frequencyMap = calculateFrequency(input);
+
+        // Display character frequencies
+        System.out.println("\nCharacter Frequencies:");
+        frequencyMap.forEach((character, frequency) -> 
+            System.out.println(character + ": " + frequency)
+        );
+
+        // Step 2: Prepare character array and frequency array from the map
+        int n = frequencyMap.size();
+        char[] charArray = new char[n];
+        int[] charfreq = new int[n];
+        int i = 0;
+        for (Map.Entry<Character, Integer> entry : frequencyMap.entrySet()) {
+            charArray[i] = entry.getKey();
+            charfreq[i] = entry.getValue();
+            i++;
         }
 
-        return encodedText.toString();
-    }
+        // Step 3: Build Huffman Tree
+        HuffmanNode root = buildHuffmanTree(charArray, charfreq);
 
-    // Function to calculate frequency of each character in the input text
-    public static Map<Character, Integer> calculateFrequency(String text) {
-        Map<Character, Integer> frequencyMap = new HashMap<>();
+        // Step 4: Print Huffman Codes by traversing the tree
+        System.out.println("\nHuffman Codes:");
+        printCode(root, ""); 
+    } 
+} 
 
-        for (char character : text.toCharArray()) {
-            frequencyMap.put(character, frequencyMap.getOrDefault(character, 0) + 1);
-        }
+// Node class is the basic structure of each node in the Huffman tree
+class HuffmanNode { 
+    int data; 
+    char c; 
+    HuffmanNode left; 
+    HuffmanNode right; 
+} 
 
-        return frequencyMap;
-    }
-
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter the text to encode: ");
-        String text = scanner.nextLine();
-
-        // Step 1: Calculate the frequency of each character
-        Map<Character, Integer> frequencyMap = calculateFrequency(text);
-
-        // Step 2: Build the Huffman Tree
-        HuffmanNode root = buildHuffmanTree(frequencyMap);
-
-        // Step 3: Generate Huffman Codes
-        Map<Character, String> huffmanCodes = new HashMap<>();
-        generateCodes(root, "", huffmanCodes);
-
-        // Print the Huffman Codes for each character
-        System.out.println("Huffman Codes:");
-        for (Map.Entry<Character, String> entry : huffmanCodes.entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
-        }
-
-        // Step 4: Encode the input text
-        String encodedText = encode(text, huffmanCodes);
-        System.out.println("\nEncoded Text: " + encodedText);
-
-        scanner.close();
-    }
-}
+// Comparator class helps to compare nodes based on their frequency (data)
+class MyComparator implements Comparator<HuffmanNode> { 
+    public int compare(HuffmanNode x, HuffmanNode y) { 
+        return x.data - y.data; 
+    } 
+} 
