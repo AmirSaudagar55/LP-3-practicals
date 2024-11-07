@@ -1,6 +1,50 @@
 Huffman Encoding : https://www.youtube.com/watch?v=uDS8AkTAcIU&pp=ygUQaHVmZm1hbiBlbmNvZGluZw%3D%3D
 knapsack 0/1 : https://m.youtube.com/watch?v=5JXz5VEg_g8&pp=ygUnMCAxIGtuYXBzYWNrIHVzaW5nIGR5bmFtaWMgcHJvZ3JhbW1pbmcg
 ____________________________________________________________________________________________________
+
+# 0/1 Knapsack Problem
+
+Given:
+- `n` items, each with a `weight` and `profit`.
+- A knapsack with a maximum capacity `W`.
+
+### Dynamic Programming Approach
+
+Let `dp[i][w]` represent the maximum profit we can achieve using the first `i` items with a knapsack capacity `w`.
+
+### Recursive Formula
+
+The formula for filling the `dp` table is:
+
+\[
+dp[i][w] = \begin{cases} 
+      dp[i-1][w] & \text{if } \text{weight of item } i > w \\
+      \max(dp[i-1][w], \ \text{profit of item } i + dp[i-1][w - \text{weight of item } i]) & \text{if } \text{weight of item } i \leq w 
+   \end{cases}
+\]
+
+Explanation:
+- If the weight of the current item is greater than the knapsack capacity `w`, we cannot include it. Therefore:
+  \[
+  dp[i][w] = dp[i-1][w]
+  \]
+- If the weight of the item is less than or equal to `w`, we have two choices:
+  1. Exclude the item: `dp[i][w] = dp[i-1][w]`
+  2. Include the item: `dp[i][w] = \text{profit of item } i + dp[i-1][w - \text{weight of item } i]`
+
+We take the maximum of these two values:
+\[
+dp[i][w] = \max(dp[i-1][w], \ \text{profit of item } i + dp[i-1][w - \text{weight of item } i])
+\]
+
+### Base Case
+\[
+dp[0][w] = 0 \quad \text{for all } w
+\]
+This means if there are no items, the maximum profit is `0` regardless of the knapsack capacity.
+
+
+
 To explain the 0/1 Knapsack problem in a format similar to the table you provided, let's walk through the example.
 
 ### Problem Setup
